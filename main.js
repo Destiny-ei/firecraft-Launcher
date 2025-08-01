@@ -16,7 +16,6 @@ const execPromise = util.promisify(exec);
 // ==========================================================
 //      INICIO: CONFIGURACIÓN DE DISCORD RICH PRESENCE
 // ==========================================================
-
 const clientId = '1400661686792491171'; 
 Rpc.register(clientId);
 const rpc = new Rpc.Client({ transport: 'ipc' });
@@ -77,7 +76,6 @@ rpc.on('ready', () => {
 app.on('before-quit', () => {
     if (rpc) rpc.destroy();
 });
-
 // ==========================================================
 //      FIN: CONFIGURACIÓN DE DISCORD RICH PRESENCE
 // ==========================================================
@@ -121,22 +119,88 @@ app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) creat
 
 
 // ==========================================================
-//      INICIO: GESTIÓN DE EVENTOS DE LA INTERFAZ
+//      INICIO: LÓGICA DE VERIFICACIÓN E INSTALACIÓN DE JAVA
 // ==========================================================
 
-// --- ¡¡¡CÓDIGO AÑADIDO!!! ---
-// Este es el listener que faltaba para minimizar la ventana.
+async function verifyJava(event) {
+    event.sender.send('log', '[INFO] Verificando instalación de Java...');
+    try {
+        const { stdout, stderr } = await execPromise('java -version');
+        const output = stderr || stdout;
+
+        if (output.includes('version "21.') || output.includes('version 21.')) {
+            event.sender.send('log', '[INFO] Java 21 encontrado.');
+            return true;
+        } else {
+            event.sender.send('log', `[WARN] Se encontró una versión de Java, pero no es la 21. Versión detectada: ${output.split('\n')[0]}`);
+            return false;
+        }
+    } catch (error) {
+        event.sender.send('log', '[WARN] El comando "java" no se encontró. Java no está instalado.');
+        return false;
+    }
+}
+
+ipcMain.on('install-java', async (event) => {
+    event.sender.send('log', '[INFO] Iniciando descarga de Java 21...');
+    const javaInstallerUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.msi';
+    const tempPath = app.getPath('temp');
+    const installerName = 'OpenJDK21-installer.msi';
+    const installerPath = path.join(tempPath, installerName);
+
+    const dl = new DownloaderHelper(javaInstallerUrl, tempPath, { override: true, fileName: installerName });
+
+    dl.on('error', (err) => {
+        console.error('[Java Install] Error de descarga:', err);
+        event.sender.send('log', `[ERROR] No se pudo descargar Java: ${err.message}`);
+        event.sender.send('java-install-failed');
+    });
+
+    dl.on('progress', (stats) => {
+        event.sender.send('java-install-progress', { percentage: stats.progress.toFixed(2) });
+    });
+    
+    dl.on('end', async () => {
+        try {
+            event.sender.send('log', '[INFO] Descarga de Java completada. Iniciando instalación...');
+            event.sender.send('java-install-progress', { text: 'Instalando... Esto puede tardar unos minutos.' });
+            await execPromise(`msiexec /i "${installerPath}" /qn`);
+            event.sender.send('log', '[INFO] Instalación de Java completada.');
+            event.sender.send('java-install-finished');
+        } catch (installError) {
+            console.error('Error al instalar Java:', installError);
+            event.sender.send('log', `[ERROR] No se pudo instalar Java: ${installError.message}`);
+            event.sender.send('java-install-failed');
+        }
+    });
+
+    dl.start().catch(err => {
+        console.error('[Java Install] Error al iniciar la descarga:', err);
+        event.sender.send('log', `[ERROR] No se pudo iniciar la descarga de Java: ${err.message}`);
+        event.sender.send('java-install-failed');
+    });
+});
+// ==========================================================
+//      FIN: LÓGICA DE VERIFICACIÓN E INSTALACIÓN DE JAVA
+// ==========================================================
+
+
 ipcMain.on('minimize-window', () => {
     if (mainWindow) {
         mainWindow.minimize();
     }
 });
-// -----------------------------
 
 let isGameRunning = false;
 
 ipcMain.on('launch-minecraft', async (event, options) => {
     if (isGameRunning) return;
+
+    const javaReady = await verifyJava(event);
+    if (!javaReady) {
+        event.sender.send('java-not-found');
+        return;
+    }
     
     isGameRunning = true;
     mainWindow.webContents.send('update-launch-button', isGameRunning);
@@ -194,10 +258,6 @@ ipcMain.on('launch-minecraft', async (event, options) => {
         setActivity('En el launcher', 'Ocurrió un error');
     }
 });
-
-// ==========================================================
-//      FIN: GESTIÓN DE EVENTOS DE LA INTERFAZ
-// ==========================================================
 
 
 async function checkForModpackUpdate(modality, event) {

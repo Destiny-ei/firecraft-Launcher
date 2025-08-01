@@ -143,6 +143,26 @@
         </div>
     </div>
 
+    <div id="java-install-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Java 21 no encontrado</h2>
+            <p>Para poder jugar, es necesario tener Java 21 instalado en tu sistema.</p>
+            <p>¿Quieres que el lanzador lo descargue e instale por ti?</p>
+            
+            <div id="java-progress-container" style="display: none;">
+                <div class="progress-wrapper">
+                    <div id="java-progress-bar"></div>
+                </div>
+                <p id="java-progress-text">Descargando...</p>
+            </div>
+
+            <div id="java-modal-buttons">
+                 <button id="install-java-btn" class="launch-button">Sí, instalar Java</button>
+                 <button id="cancel-java-btn" class="launch-button" style="background: #555;">No, gracias</button>
+            </div>
+        </div>
+    </div>
+
     <script src="./renderer.js"></script>
 </body>
 

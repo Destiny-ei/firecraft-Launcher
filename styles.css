@@ -621,3 +621,9 @@ button.disabled::before {
     width: 50%;
     margin: 20px auto 0 auto;
 }
+#java-progress-bar {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-yellow));
+    transition: width 0.3s ease;
+}

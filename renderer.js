@@ -75,11 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             
-            // Actualizar la UI
             const onlineStatus = data.online ? `${data.players.online}/${data.players.max}` : 'Offline';
             document.querySelector('.profile-section p').textContent = `Conectados: ${onlineStatus}`;
 
-            // <-- AÑADIDO: Enviar estado al proceso principal para Discord RPC
             if(data.online) {
                 ipcRenderer.send('update-server-status', data);
             }
@@ -116,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', closeModal);
     understandBtn.addEventListener('click', closeModal);
 
-    // Opcional: Cerrar al hacer clic fuera del contenido
     welcomeModal.addEventListener('click', (event) => {
         if (event.target === welcomeModal) {
             closeModal();
@@ -182,4 +179,54 @@ document.querySelectorAll('#credits a').forEach(link => {
         event.preventDefault();
         shell.openExternal(link.href);
     });
+});
+
+// --- Lógica para la instalación de Java ---
+
+const javaModal = document.getElementById('java-install-modal');
+const installJavaBtn = document.getElementById('install-java-btn');
+const cancelJavaBtn = document.getElementById('cancel-java-btn');
+const javaProgressContainer = document.getElementById('java-progress-container');
+const javaProgressBar = document.getElementById('java-progress-bar');
+const javaProgressText = document.getElementById('java-progress-text');
+const javaModalButtons = document.getElementById('java-modal-buttons');
+
+ipcRenderer.on('java-not-found', () => {
+    javaModal.style.display = 'flex';
+});
+
+installJavaBtn.addEventListener('click', () => {
+    javaModalButtons.style.display = 'none';
+    javaProgressContainer.style.display = 'block';
+    ipcRenderer.send('install-java');
+});
+
+cancelJavaBtn.addEventListener('click', () => {
+    javaModal.style.display = 'none';
+});
+
+ipcRenderer.on('java-install-progress', (event, { percentage, text }) => {
+    if (percentage) {
+        javaProgressBar.style.width = `${percentage}%`;
+        javaProgressText.textContent = `Descargando... ${percentage}%`;
+    }
+    if (text) {
+        javaProgressText.textContent = text;
+    }
+});
+
+ipcRenderer.on('java-install-finished', () => {
+    javaProgressText.textContent = '¡Java instalado! Por favor, haz clic en "Iniciar Minecraft" de nuevo.';
+    javaProgressContainer.style.display = 'none';
+    javaModalButtons.style.display = 'block';
+    installJavaBtn.style.display = 'none';
+    cancelJavaBtn.textContent = 'Cerrar';
+});
+
+ipcRenderer.on('java-install-failed', () => {
+    javaProgressText.textContent = 'La instalación falló. Revisa los logs para más detalles.';
+    javaProgressContainer.style.display = 'none';
+    javaModalButtons.style.display = 'block';
+    installJavaBtn.style.display = 'none';
+    cancelJavaBtn.textContent = 'Cerrar';
 });
