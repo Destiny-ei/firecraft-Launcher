@@ -1,0 +1,53 @@
+# ## Archivo .gitignore para un proyecto de Electron ##
+
+# Dependencias descargadas
+# Esta es la carpeta más importante a ignorar. Contiene cientos de megas de archivos
+# que cualquiera puede reinstalar ejecutando `npm install`.
+/node_modules
+
+# Archivos de Build y Empaquetado
+# La carpeta 'dist' es generada por electron-builder y contiene los instaladores .exe, .dmg, etc.
+# Estos archivos no deben estar en el repositorio, se suben a la sección de "Releases" en GitHub.
+/dist
+/release
+*.zip
+*.rar
+*.7z
+
+# Backups
+# Ignorar copias de seguridad locales del proyecto.
+/backups
+.version.json
+# Logs
+# Archivos de registro que se generan durante la ejecución o depuración.
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de configuración local y variables de entorno
+# El archivo .env suele contener claves secretas y tokens (como los de Discord o GitHub).
+# ¡Nunca subas este archivo a un repositorio público!
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archivos del Sistema Operativo
+# Basura generada por macOS, Windows y Linux.
+.DS_Store
+Thumbs.db
+ehthumbs.db
+._*
+
+# Archivos de Editor de Código e IDE
+# Configuraciones específicas de tu editor de código.
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Caché de Electron y otras herramientas
+.electron/
+.electron-builder/cache/
