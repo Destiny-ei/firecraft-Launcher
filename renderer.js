@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchUpdateNotes = async () => {
         try {
-            const response = await fetch('https://files.shukketsu.app/update-notes.html');
+            const response = await fetch('');
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.text();
             document.getElementById('notes').innerHTML = data;

@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+    --primary-red: #D72323;
+    --accent-orange: #F3732A;
+    --accent-yellow: #FCAF38;
+    --text-light: #E5E9F0;
+    --bg-dark: #14141e;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+}
+
+h1 {
+    color: var(--accent-yellow);
+    font-size: 24px;
+}
+
+.content {
+    flex-grow: 1;
+    background-color: rgba(30, 30, 40, 0.7);
+    border-radius: 10px;
+    padding: 20px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+/* Estilos para la página de la licencia */
+.content .license {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.buttons {
+    padding-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+button {
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+button.primary {
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-yellow));
+    color: white;
+}
+
+button.primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#cancel-button {
+    background-color: #555;
+    color: var(--text-light);
+}
+
+#cancel-button:hover {
+    background-color: #666;
+}
