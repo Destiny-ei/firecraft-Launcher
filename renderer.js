@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchUpdateNotes = async () => {
         try {
-            const response = await fetch('https://raw.githubusercontent.com/Destiny-ei/firecraft-Launcher/refs/heads/main/build/cambios.html?token=GHSAT0AAAAAADIM3WCGINRGYUK4KLP6DJTA2ENGSZQ');
+            const response = await fetch('https://raw.githubusercontent.com/Destiny-ei/firecraft-Launcher/refs/heads/main/build/cambios.html?token=GHSAT0AAAAAADIM3WCG2JKHFCMJYKZCAEFQ2ENGVXA');
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.text();
             document.getElementById('notes').innerHTML = data;
