@@ -1,61 +1,70 @@
 {
     "name": "firecraft-launcher",
     "version": "1.0.0",
+    "description": "Launcher para FireCraft",
     "main": "main.js",
     "scripts": {
         "start": "electron .",
         "dist": "electron-builder"
     },
-"build": {
-    "appId": "net.firemods.destiny",
-    "publish": [
-        {
-            "provider": "github",
-            "owner": "Destiny-ei",
-            "repo": "firecraft-Launcher"
+    "build": {
+        "appId": "net.firemods.destiny",
+        "protocols": [
+            {
+                "name": "FireCraft Protocol",
+                "schemes": [
+                    "firecraft"
+                ]
+            }
+        ],
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "Destiny-ei",
+                "repo": "firecraft-Launcher"
+            }
+        ],
+        "mac": {
+            "category": "public.game",
+            "target": "dmg",
+            "icon": "build/icon.icns"
+        },
+        "linux": {
+            "target": "AppImage",
+            "category": "Game",
+            "icon": "build/icon.png"
+        },
+        "win": {
+            "target": "nsis-web",
+            "icon": "build/icon.ico"
+        },
+        "nsisWeb": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "license": "build/license.txt",
+            "installerIcon": "build/installerIcon.ico",
+            "uninstallerIcon": "build/uninstallerIcon.ico"
+        },
+        "files": [
+            "build/**/*",
+            "index.html",
+            "main.js",
+            "renderer.js",
+            "styles.css"
+        ],
+        "directories": {
+            "buildResources": "build"
         }
-    ],
-    "mac": {
-        "category": "public.game",
-        "target": "dmg",
-        "icon": "build/icon.icns"
     },
-    "linux": {
-        "target": "AppImage",
-        "category": "Game",
-        "icon": "build/icon.png"
-    },
-    "win": {
-        "target": "nsis-web",
-        "icon": "build/icon.ico"
-    },
-    "nsisWeb": {
-        "oneClick": false,
-        "allowToChangeInstallationDirectory": true,
-        "license": "build/license.txt",
-        "installerIcon": "build/installerIcon.ico",
-        "uninstallerIcon": "build/uninstallerIcon.ico"
-    },
-    "files": [
-        "build/**/*",
-        "index.html",
-        "main.js",
-        "renderer.js",
-        "styles.css"
-    ],
-    "directories": {
-        "buildResources": "build"
-    }
-},
     "keywords": [],
-    "author": "",
+    "author": "Destiny",
     "license": "ISC",
-    "description": "",
     "dependencies": {
         "axios": "^1.7.8",
         "discord-rpc": "^4.0.1",
         "electron-updater": "^6.2.1",
         "extract-zip": "^2.0.1",
+        "find-process": "^1.4.7",
         "minecraft-launcher-core": "^3.18.1",
         "node-downloader-helper": "^2.1.9",
         "tomate-loaders": "^2.0.2"

@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>FireCraft Launcher</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <div class="launcher-container">
         <div class="titlebar">
@@ -21,7 +19,8 @@
             <button class="tab-btn" data-tab="logs">Logs</button>
             <button class="tab-btn" data-tab="settings">Ajustes</button>
             <button class="tab-btn" data-tab="credits">Creditos</button>
-            <button class="tab-btn" data-tab="updates">Notas de actualización</button>
+            <button class="tab-btn" data-tab="updates">Noticias</button>
+            <button class="tab-btn" data-tab="manage">Administrar</button>
         </div>
 
         <div id="play" class="tab-content active play-section">
@@ -36,24 +35,45 @@
                         <i class="fa-solid fa-user"></i>
                         <input type="text" id="username" placeholder="Usuario de Microsoft (Opcional)" class="custom-input">
                     </div>
+                    
                     <div class="input-group">
                         <i class="fas fa-gamepad"></i>
-                        <select id="modality-select" class="custom-input">
-                            <option value="vanilla">Vanilla</option>
-                            <option value="fabric">Fabric</option>
-                            <option value="firemods-neoforge">FireMods (NeoForge)</option>
-                        </select>
+                        <div class="custom-select-wrapper" id="modality-select-wrapper">
+                            <div class="custom-select-trigger" data-selected-value="firemods-neoforge">
+                                <span>FireMods (NeoForge 1.21.1)</span>
+                                <div class="arrow"></div>
+                            </div>
+                            <div class="custom-options">
+                                <div class="custom-option" data-value="vanilla">Vanilla</div>
+                                <div class="custom-option" data-value="firelite-forge">FireLite (Forge 1.20.1)</div>
+                                <div class="custom-option selected" data-value="firemods-neoforge">FireMods (NeoForge 1.21.1)</div>
+                            </div>
+                        </div>
                     </div>
-                    <p id="feedback-message" style="color: #EC6F9E;"></p>
+                    
+                    <div class="input-group" id="vanilla-version-group" style="display: none;">
+                        <i class="fas fa-code-branch"></i>
+                        <div class="custom-select-wrapper" id="version-select-wrapper">
+                            <div class="custom-select-trigger">
+                                <span>Cargando versiones...</span>
+                                <div class="arrow"></div>
+                            </div>
+                            <div class="custom-options">
+                                </div>
+                        </div>
+                    </div>
+
+                    <p id="feedback-message" style="color: #FF5F56; text-align: center; margin-top: 10px;"></p>
                 </div>
                 <button id="launch-button" class="launch-button">Iniciar Minecraft</button>
+                <button id="force-close-button" class="launch-button" style="display: none; background: var(--primary-red);">Forzar cierre</button>
+                
                 <div id="progress-container" style="display: none;">
                     <div class="progress-wrapper">
                         <div id="progress-bar"></div>
                     </div>
                     <p id="progress-text">Preparando...</p>
                 </div>
-
                 <div id="update-notification" style="display: none;">
                     <div class="progress-wrapper">
                         <div id="update-progress-bar"></div>
@@ -67,10 +87,8 @@
         <div id="logs" class="tab-content logs-section">
             <h3>Logs del launcher</h3>
             <div id="log-output" class="logs-content"></div>
-            <button id="scroll-to-bottom" class="scroll-button">
-                <i class="fas fa-arrow-down"></i>
-            </button>
         </div>
+
         <div id="settings" class="tab-content settings-section">
             <h3>Configuración del launcher</h3>
             <div>
@@ -83,23 +101,60 @@
                 <input type="range" id="max-memory" min="2" max="12" value="4">
                 <span id="max-memory-value">4G</span>
             </div>
+
+            <hr style="margin: 20px 0; border-color: rgba(100, 100, 120, 0.3);">
+
+            <div>
+                <h3>Reparar Instalación</h3>
+                <p style="opacity: 0.7; font-size: 14px; margin-bottom: 15px;">
+                    Si tienes problemas con el juego (crasheos, errores), esto puede solucionarlo. Se borrarán las carpetas 'mods' y 'config' para forzar una reinstalación limpia del modpack la próxima vez que inicies el juego.
+                </p>
+                <button id="repair-button" class="launch-button" style="background: var(--primary-red);">Reparar Instalación</button>
+                <p id="repair-feedback" style="color: #4CAF50; text-align: center; margin-top: 10px;"></p>
+            </div>
         </div>
 
         <div id="credits" class="tab-content credits-section">
             <h3>Información del Launcher</h3>
-            <p>DSTNY</p>
+            <p>Creado por Destiny</p>
             <p>Espero y te guste el launcher ❤️</p>
-            <a id="your-link" href="https://firemods.net/shop" target="_blank" style="color: #C8ACD6;">Nuestra Tienda!</a>
+            <a href="https://firemods.net/shop" target="_blank" style="color: #C8ACD6;">Nuestra Tienda!</a>
             <br>
-            <a id="your-link" href="https://discord.gg/" target="_blank"
-                style="color: #C8ACD6;">Discord Principal</a>
-            <br>
-            <a id="your-link" href="" target="_blank"
-                style="color: #C8ACD6;"></a>
+            <a href="https://discord.gg/Thct3Qyksj" target="_blank" style="color: #C8ACD6;">Discord Principal</a>
         </div>
+        
         <div id="updates" class="tab-content updates-section">
-            <div id="notes">Loading update notes...</div>
+            <h3>Noticias y Anuncios</h3>
+            <div id="notes">Cargando noticias...</div>
         </div>
+
+        <div id="manage" class="tab-content settings-section">
+            <h3>Administrar Instalación</h3>
+            
+            <div class="input-group">
+                <label for="manage-modality-select">Gestionar modalidad:</label>
+                <select id="manage-modality-select" class="custom-input">
+                    <option value="firemods-neoforge">FireMods (NeoForge 1.21.1)</option>
+                    <option value="firelite-forge">FireLite (Forge 1.20.1)</option>
+                </select>
+            </div>
+        
+            <hr style="margin: 20px 0; border-color: rgba(100, 100, 120, 0.3);">
+        
+            <h4><i class="fas fa-puzzle-piece"></i> Mods</h4>
+            <div id="mods-list-container" class="mods-container">
+                <p>Selecciona una modalidad para ver los mods.</p>
+            </div>
+        
+            <hr style="margin: 20px 0; border-color: rgba(100, 100, 120, 0.3);">
+        
+            <h4><i class="fas fa-image"></i> Recursos Gráficos</h4>
+            <div class="resource-buttons">
+                <button id="open-shaders-folder" class="launch-button" style="margin: 5px; font-size: 14px;">Abrir Carpeta de Shaders</button>
+                <button id="open-resourcepacks-folder" class="launch-button" style="margin: 5px; font-size: 14px;">Abrir Carpeta de Texturas</button>
+            </div>
+        </div>
+
     </div>
 
     <div id="welcome-modal" class="modal-overlay">
@@ -107,23 +162,19 @@
             <button id="close-modal-btn" class="modal-close-btn">&times;</button>
             <h2>¡Bienvenido al launcher de FireCraft!</h2>
             <p>Aquí tienes una guía rápida para empezar a jugar con mods.</p>
-
             <h3>Cómo iniciar la modalidad "FireMods"</h3>
             <ol>
-                <li>En el menú desplegable "Modalidad", selecciona primero <strong>vanilla</strong> para instalar la versión vanilla</strong>.</li>
+                <li>En el menú desplegable "Modalidad", selecciona primero <strong>vanilla</strong>.</li>
                 <li>Haz clic en "Iniciar Minecraft" para descargar la versión vanilla.</li>
                 <li>Una vez que el juego se haya iniciado, cierra Minecraft.</li>
-                <li>Vuelve al launcher y selecciona <strong>FireMods (NeoForge)</strong> en el menú desplegable "Modalidad".</li>
-                <li>Haz clic en "Iniciar Minecraft".</li>
-                <li>La primera vez, el lanzador descargará e instalará automáticamente todo lo necesario. ¡Ten paciencia!</li>
+                <li>Vuelve al launcher y selecciona <strong>FireMods (NeoForge)</strong>.</li>
+                <li>Haz clic en "Iniciar Minecraft" de nuevo. ¡El modpack se descargará automáticamente!</li>
             </ol>
-
             <div class="requirements-container">
                 <div class="requirements-column">
                     <h3>Requisitos Mínimos</h3>
                     <ul>
                         <li><i class="fas fa-memory"></i> RAM: 5 GB asignados</li>
-                        <li><i class="fas fa-microchip"></i> CPU: </li>
                         <li><i class="fas fa-desktop"></i> GPU: NVIDIA GeForce GTX 660 / AMD Radeon HD 7850</li>
                         <li><i class="fas fa-hdd"></i> Espacio: 500 mb libres</li>
                     </ul>
@@ -132,7 +183,6 @@
                     <h3>Requisitos Recomendados</h3>
                     <ul>
                         <li><i class="fas fa-memory"></i> RAM: 8 GB asignados</li>
-                        <li><i class="fas fa-microchip"></i> CPU: </li>
                         <li><i class="fas fa-desktop"></i> GPU: NVIDIA GeForce GTX 1060 / AMD Radeon RX 580</li>
                         <li><i class="fas fa-hdd"></i> Espacio: 500 mb libres</li>
                     </ul>
@@ -147,14 +197,12 @@
             <h2>Java 21 no encontrado</h2>
             <p>Para poder jugar, es necesario tener Java 21 instalado en tu sistema.</p>
             <p>¿Quieres que el lanzador lo descargue e instale por ti?</p>
-            
             <div id="java-progress-container" style="display: none;">
                 <div class="progress-wrapper">
                     <div id="java-progress-bar"></div>
                 </div>
                 <p id="java-progress-text">Descargando...</p>
             </div>
-
             <div id="java-modal-buttons">
                  <button id="install-java-btn" class="launch-button">Sí, instalar Java</button>
                  <button id="cancel-java-btn" class="launch-button" style="background: #555;">No, gracias</button>
@@ -164,5 +212,4 @@
 
     <script src="./renderer.js"></script>
 </body>
-
 </html>

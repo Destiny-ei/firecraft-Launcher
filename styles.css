@@ -420,6 +420,7 @@ body {
 
 input[type="range"] {
     -webkit-appearance: none;
+    appearance: none;
     width: 100%;
     height: 8px;
     background: linear-gradient(45deg, var(--accent-orange), var(--accent-yellow));
@@ -626,4 +627,216 @@ button.disabled::before {
     height: 100%;
     background: linear-gradient(45deg, var(--accent-orange), var(--accent-yellow));
     transition: width 0.3s ease;
+}
+/* Estilo para resaltar error en el input */
+.input-error {
+    border: 1px solid #FF5F56 !important;
+    box-shadow: 0 0 10px rgba(255, 95, 86, 0.4) !important;
+}
+/* === ESTILOS PARA EL SELECTOR PERSONALIZADO === */
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    user-select: none;
+}
+
+.custom-select-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px 12px 40px; /* Padding izquierdo para el ícono del input-group */
+    background: rgba(30, 30, 40, 0.7);
+    border: 1px solid var(--accent-orange);
+    border-radius: 6px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 10px rgba(243, 115, 42, 0.3);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.custom-select-trigger .arrow {
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--accent-orange);
+    border-bottom: 2px solid var(--accent-orange);
+    transform: rotate(45deg);
+    transition: transform 0.3s ease;
+}
+
+.custom-select-wrapper.open .arrow {
+    transform: rotate(-135deg);
+}
+
+.custom-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e1e28;
+    border: 1px solid var(--accent-yellow);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.custom-select-wrapper.open .custom-options {
+    display: block;
+}
+
+.custom-option {
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.custom-option:hover {
+    background-color: var(--accent-orange);
+}
+
+.custom-option.selected {
+    background-color: var(--primary-red);
+    color: white;
+}
+/* --- ESTILOS PARA LA NUEVA PESTAÑA "ADMINISTRAR" --- */
+
+.mods-container {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(10, 10, 20, 0.5);
+    border: 1px solid rgba(100, 100, 120, 0.3);
+    border-radius: 8px;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+/* Estilo para el mensaje cuando no hay mods */
+#mods-list-container p {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* Estilo de la "tarjeta" para cada mod */
+.mod-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin: 5px;
+    background-color: rgba(30, 30, 40, 0.8);
+    border-radius: 6px;
+    border-left: 4px solid var(--accent-orange);
+    transition: all 0.3s ease;
+}
+
+/* Efecto al pasar el ratón */
+.mod-item:hover {
+    background-color: rgba(45, 45, 60, 0.9);
+    border-left-color: var(--accent-yellow);
+    transform: scale(1.02);
+}
+
+/* Contenedor para el ícono y el nombre del mod */
+.mod-name-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-light);
+    flex-grow: 1;
+    overflow: hidden; /* Para manejar nombres largos */
+}
+
+.mod-name-container i {
+    color: var(--accent-orange);
+}
+
+.mod-name {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Añade "..." a nombres largos */
+}
+
+/* Estilo para los mods desactivados */
+.mod-item.disabled-mod {
+    opacity: 0.5;
+    border-left-color: #555;
+    background-color: rgba(20, 20, 30, 0.8);
+}
+
+.mod-item.disabled-mod:hover {
+    opacity: 0.7;
+}
+
+.mod-item.disabled-mod .mod-name-container i {
+    color: #555;
+}
+
+/* Estilo para el interruptor de Activar/Desactivar */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background: linear-gradient(45deg, var(--accent-orange), var(--accent-yellow));
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.resource-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+#force-close-button {
+    cursor: pointer;
 }
