@@ -1,51 +1,5 @@
 const { ipcRenderer, shell } = require('electron');
 
-// --- FUNCIÓN PARA OBTENER EL ESTADO DEL SERVIDOR (CON LÓGICA DE PARSEO Y MANEJO DE ERRORES) ---
-const fetchOnlineStatus = async () => {
-    try {
-        const response = await fetch('https://api.minetools.eu/ping/play.firemods.net');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-
-        // Si la API devuelve un error o no encuentra el objeto 'players', el servidor está offline.
-        if (data.error || !data.players) {
-            document.querySelector('.profile-section p').textContent = 'Conectados: Offline';
-            ipcRenderer.send('update-server-status', { online: false }); // Enviar estado offline a Discord
-            return;
-        }
-
-        // Lógica para extraer el contador de jugadores real desde el MOTD
-        let realOnlineCount = data.players.online; // Usar como fallback
-
-        if (data.version && data.version.name) {
-            const motd = data.version.name;
-            // PASO 1: Limpiar el texto de todos los códigos de color y formato de Minecraft
-            const cleanMotd = motd.replace(/§[0-9a-fk-or]/gi, '');
-            
-            // PASO 2: Extraer el número del texto ya limpio
-            const parts = cleanMotd.split(' ');
-            const lastPart = parts[parts.length - 1]; 
-            const extractedNumber = parseInt(lastPart.replace(/[^0-9]/g, ''), 10);
-
-            if (!isNaN(extractedNumber)) {
-                realOnlineCount = extractedNumber; // Si se extrajo un número válido, se usa ese
-            }
-        }
-        
-        const onlineStatus = `${realOnlineCount}/${data.players.max}`;
-        document.querySelector('.profile-section p').textContent = `Conectados: ${onlineStatus}`;
-        
-        // Se envía la data corregida para que Discord RPC también muestre el número correcto
-        const correctedData = { ...data, online: true, players: { ...data.players, online: realOnlineCount } };
-        ipcRenderer.send('update-server-status', correctedData);
-
-    } catch (error) {
-        console.error('Error fetching the online status:', error);
-        document.querySelector('.profile-section p').textContent = 'Conectados: N/A';
-        ipcRenderer.send('update-server-status', { online: false }); // Enviar estado offline a Discord en caso de error de red
-    }
-};
-
 // --- LÓGICA PARA HACER FUNCIONAR LOS SELECTORES PERSONALIZADOS ---
 function setupCustomSelects() {
     document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
@@ -176,6 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalitySelectWrapper = document.getElementById('modality-select-wrapper');
     const vanillaVersionGroup = document.getElementById('vanilla-version-group');
 
+    // --- UPDATED: Server Status Logic ---
+    const updateStatusForModality = () => {
+        const selectedModality = modalitySelectWrapper.querySelector('.custom-select-trigger').dataset.selectedValue;
+        ipcRenderer.send('request-server-status', { modality: selectedModality });
+    };
+
     modalitySelectWrapper.addEventListener('change', () => {
         const selectedModality = modalitySelectWrapper.querySelector('.custom-select-trigger').dataset.selectedValue;
         if (selectedModality === 'vanilla') {
@@ -183,8 +143,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             vanillaVersionGroup.style.display = 'none';
         }
+        updateStatusForModality();
     });
-    modalitySelectWrapper.dispatchEvent(new Event('change'));
+    
+    ipcRenderer.on('server-status-update', (event, data) => {
+        const statusElement = document.querySelector('.profile-section p');
+        if (!data) {
+            statusElement.textContent = 'Conectados: N/A';
+            return;
+        }
+    
+        if (data.customMessage) {
+            statusElement.textContent = data.customMessage;
+        } else if (data.online) {
+            statusElement.textContent = `Conectados: ${data.players.online}/${data.players.max}`;
+        } else {
+            statusElement.textContent = 'Servidor Offline';
+        }
+    });
+
+    // Initial call to get status for the default modality
+    updateStatusForModality();
+    // --- End of Server Status Logic ---
 
     const populateVersionSelector = async () => {
         const versionOptionsContainer = document.querySelector('#version-select-wrapper .custom-options');
@@ -248,11 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     fetchNews();
     
-    // --- LLAMADAS A LA FUNCIÓN DE ESTADO DEL SERVIDOR ---
-    fetchOnlineStatus();
-    setInterval(fetchOnlineStatus, 5000);
-
-    // --- LÓGICA DE BOTONES DE LANZAMIENTO (CORREGIDA) ---
     const launchButton = document.getElementById('launch-button');
     const forceCloseButton = document.getElementById('force-close-button');
     const progressContainer = document.getElementById('progress-container');
@@ -410,8 +385,23 @@ const javaProgressContainer = document.getElementById('java-progress-container')
 const javaProgressBar = document.getElementById('java-progress-bar');
 const javaProgressText = document.getElementById('java-progress-text');
 const javaModalButtons = document.getElementById('java-modal-buttons');
+const javaLinuxInstructions = document.getElementById('java-linux-instructions');
+const javaModalQuestion = document.getElementById('java-modal-question');
+const restartJavaBtn = document.getElementById('restart-java-btn');
 
-ipcRenderer.on('java-not-found', () => {
+
+ipcRenderer.on('java-not-found', (event, { os }) => {
+    if (os === 'linux') {
+        javaLinuxInstructions.style.display = 'block';
+        javaModalQuestion.style.display = 'none';
+        installJavaBtn.style.display = 'none';
+        cancelJavaBtn.textContent = 'Cerrar';
+    } else {
+        javaLinuxInstructions.style.display = 'none';
+        javaModalQuestion.style.display = 'block';
+        installJavaBtn.style.display = 'inline-block';
+        cancelJavaBtn.textContent = 'No, gracias';
+    }
     if (javaModal) javaModal.style.display = 'flex';
 });
 
@@ -429,10 +419,16 @@ if (cancelJavaBtn) {
     });
 }
 
+if (restartJavaBtn) {
+    restartJavaBtn.addEventListener('click', () => {
+        ipcRenderer.send('restart_app');
+    });
+}
+
 ipcRenderer.on('java-install-progress', (event, { percentage, text }) => {
     if (percentage && javaProgressBar) {
         javaProgressBar.style.width = `${percentage}%`;
-        javaProgressText.textContent = `Descargando... ${percentage}%`;
+        javaProgressText.textContent = `Descargando... ${percentage.toFixed(2)}%`;
     }
     if (text && javaProgressText) {
         javaProgressText.textContent = text;
@@ -440,18 +436,25 @@ ipcRenderer.on('java-install-progress', (event, { percentage, text }) => {
 });
 
 ipcRenderer.on('java-install-finished', () => {
-    if(javaProgressText) javaProgressText.textContent = '¡Java instalado! Por favor, haz clic en "Iniciar Minecraft" de nuevo.';
+    if(javaProgressText) javaProgressText.textContent = '¡Instalación completa! Por favor, cierra y vuelve a abrir el launcher para continuar.';
     if(javaProgressContainer) javaProgressContainer.style.display = 'none';
     if(javaModalButtons) javaModalButtons.style.display = 'block';
     if(installJavaBtn) installJavaBtn.style.display = 'none';
-    if(cancelJavaBtn) cancelJavaBtn.textContent = 'Cerrar';
+    if(cancelJavaBtn) cancelJavaBtn.style.display = 'none';
+    if(restartJavaBtn) {
+        restartJavaBtn.textContent = 'Cerrar Launcher';
+        restartJavaBtn.style.backgroundColor = 'var(--primary-red)';
+        restartJavaBtn.style.display = 'inline-block';
+    }
 });
 
-ipcRenderer.on('java-install-failed', () => {
-    if(javaProgressText) javaProgressText.textContent = 'La instalación falló. Revisa los logs para más detalles.';
+ipcRenderer.on('java-install-failed', (event, { message } = {}) => {
+    const defaultMessage = 'La instalación falló. Revisa los logs para más detalles.';
+    if(javaProgressText) javaProgressText.textContent = message || defaultMessage;
+    
     if(javaProgressContainer) javaProgressContainer.style.display = 'none';
     if(javaModalButtons) javaModalButtons.style.display = 'block';
-    if(installJavaBtn) installJavaBtn.style.display = 'none';
+    if(installJavaBtn) installJavaBtn.style.display = 'inline-block';
     if(cancelJavaBtn) cancelJavaBtn.textContent = 'Cerrar';
 });
 
@@ -483,12 +486,12 @@ ipcRenderer.on('show-and-launch', (event, { serverIp, modality }) => {
     });
 });
 
-// --- LÓGICA PARA LA PESTAÑA "ADMINISTRAR" ---
-
 const manageModalitySelect = document.getElementById('manage-modality-select');
 const modsListContainer = document.getElementById('mods-list-container');
 const openShadersBtn = document.getElementById('open-shaders-folder');
 const openResourcePacksBtn = document.getElementById('open-resourcepacks-folder');
+// NEW: Get the new button element
+const openModsBtn = document.getElementById('open-mods-folder');
 
 function fetchModsList() {
     const selectedModality = manageModalitySelect.value;
@@ -547,6 +550,14 @@ ipcRenderer.on('mods-list-response', (event, mods) => {
 });
 
 ipcRenderer.on('refresh-mods-list', fetchModsList);
+
+// NEW: Add event listener for the new button
+openModsBtn.addEventListener('click', () => {
+    ipcRenderer.send('open-folder', {
+        modality: manageModalitySelect.value,
+        folderType: 'mods'
+    });
+});
 
 openShadersBtn.addEventListener('click', () => {
     ipcRenderer.send('open-folder', {

@@ -24,15 +24,13 @@ if (process.defaultApp) {
 const clientId = '1400661686792491171';
 const serverIPs = {
     'firemods-neoforge': 'play.firemods.net',
-    'vanilla': 'Proximamente....',
-    'firelite-forge': 'Proximamente....'
+    'vanilla': 'Proximamente....'
 };
 let mainWindow;
 let isGameRunning = false;
-let isOnServer = false; // Se vuelve a usar esta variable con una lógica mejorada
+let isOnServer = false;
 let currentModality = null;
 let activeMinecraftPath = null;
-let authAbortController = null;
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -78,20 +76,11 @@ function getMinecraftPathForModality(modality) {
     switch (modality) {
         case 'firemods-neoforge':
             return path.join(userDataPath, '.firemods-neoforge');
-        case 'firelite-forge':
-            return path.join(userDataPath, '.firelite-forge');
         case 'vanilla':
         default:
             return path.join(userDataPath, '.minecraft');
     }
 }
-
-ipcMain.on('update-server-status', (event, status) => {
-    serverStatus = status;
-    if (isGameRunning) {
-        updateRpcWithCurrentStatus();
-    }
-});
 
 ipcMain.on('activity-changed', (event, activity) => {
     if (!isGameRunning) {
@@ -99,19 +88,16 @@ ipcMain.on('activity-changed', (event, activity) => {
     }
 });
 
-// ========================================================================
-// FUNCIÓN DE RICH PRESENCE (CORREGIDA CON LÓGICA DE isOnServer)
-// ========================================================================
 function updateRpcWithCurrentStatus() {
     if (!isGameRunning || !currentModality) return;
 
-    // Si el jugador está dentro del servidor Y el servidor está online, muestra el contador
-    if (isOnServer && serverStatus && serverStatus.online) {
-        const playerState = `(${serverStatus.players.online}/${serverStatus.players.max} jugadores)`;
+    if (isOnServer) {
+        const playerState = serverStatus && serverStatus.online
+            ? `(${serverStatus.players.online}/${serverStatus.players.max} jugadores)`
+            : 'En el servidor';
         const serverName = serverIPs[currentModality] || currentModality;
-        setActivity(`Jugando en ${serverName}`, playerState, 'firecraft_logo', 'minecraft_icon');
+        setActivity(`Jugando en ${serverName}/${currentModality}`, playerState, 'firecraft_logo', 'minecraft_icon');
     } else {
-        // En cualquier otro caso (menú principal, servidor offline, etc.), muestra este estado
         setActivity(`Jugando ${currentModality}`, 'En el menú principal', 'firecraft_logo', 'minecraft_icon');
     }
 }
@@ -128,8 +114,8 @@ async function setActivity(details, state, largeImageKey = 'firecraft_logo', sma
         instance: false,
     };
 
-    const buttons = [{ label: 'Descargar Launcher', url: 'https://firemods.net/storage/Modpacks/launcher.zip' }];
-    if (isGameRunning && isOnServer) { // Botón de unirse solo si estás en el servidor
+    const buttons = [{ label: 'Descargar Launcher', url: 'https://firemods.net/storage/Modpacks/Setup-FireCraft.exe' }];
+    if (isGameRunning) {
         buttons.push({ label: 'Unirse al Servidor', url: 'firecraft://join?ip=play.firemods.net' });
     }
     activityPayload.buttons = buttons;
@@ -197,87 +183,148 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 
-ipcMain.on('microsoft-login-start', async (event) => {
-    if (authAbortController) {
-        authAbortController.abort();
+ipcMain.on('restart_app', () => {
+    app.quit();
+});
+
+// --- Server Status Handling ---
+let statusInterval;
+let isFetchingStatus = false;
+
+function fetchAndSendStatus(modality) {
+    if (isFetchingStatus || !mainWindow) {
+        return;
     }
-    authAbortController = new AbortController();
-    const signal = authAbortController.signal;
+    isFetchingStatus = true;
 
-    event.sender.send('log', '[INFO] Iniciando flujo de autenticación por código de dispositivo...');
-
-    try {
-        const auth = await Authenticator.getAuth('microsoft', signal, (data) => {
-            if (data.type === 'device_code') {
-                event.sender.send('log', `[INFO] Código de dispositivo recibido: ${data.user_code}`);
-                event.sender.send('microsoft-device-code', data);
+    const serverIp = serverIPs[modality];
+    if (!serverIp || serverIp === 'Proximamente....') {
+        const status = { online: false, customMessage: 'Servidor no disponible' };
+        mainWindow.webContents.send('server-status-update', status);
+        serverStatus = null;
+        updateRpcWithCurrentStatus();
+        isFetchingStatus = false;
+        return;
+    }
+    
+    axios.get(`https://api.mcsrvstat.us/3/${serverIp}`, { timeout: 4500 })
+        .then(response => {
+            if (response.data && typeof response.data.online !== 'undefined') {
+                const statusData = response.data;
+                mainWindow.webContents.send('server-status-update', statusData);
+                serverStatus = statusData;
+                updateRpcWithCurrentStatus();
+            } else {
+                throw new Error("Respuesta de API inválida de mcsrvstat.us");
             }
+        })
+        .catch(error => {
+            console.error(`Error fetching status for ${serverIp}:`, error.message);
+            const status = { online: false, customMessage: 'Servidor Offline' };
+            mainWindow.webContents.send('server-status-update', status);
+            serverStatus = null;
+            updateRpcWithCurrentStatus();
+        })
+        .finally(() => {
+            isFetchingStatus = false;
         });
-        event.sender.send('log', `[INFO] Autenticación completada para ${auth.name}`);
-        event.sender.send('microsoft-login-success', { name: auth.name, uuid: auth.uuid });
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            event.sender.send('log', '[INFO] El usuario canceló el inicio de sesión.');
-        } else {
-            console.error('Fallo en el inicio de sesión de Microsoft:', error);
-            event.sender.send('log', `[ERROR] Fallo en el inicio de sesión de Microsoft: ${error.message}`);
-            event.sender.send('microsoft-login-failed', { message: error.message });
-        }
-    } finally {
-        authAbortController = null;
-    }
-});
-
-ipcMain.on('microsoft-login-cancel', () => {
-    if (authAbortController) {
-        authAbortController.abort();
-        authAbortController = null;
-    }
-});
-
-ipcMain.on('microsoft-logout', (event) => {
-    const accountCachePath = path.join(app.getPath('userData'), 'mclc_microsoft_accounts.json');
-    try {
-        if (fs.existsSync(accountCachePath)) {
-            fs.unlinkSync(accountCachePath);
-            event.sender.send('log', '[INFO] Sesión de Microsoft cerrada. Se ha borrado el caché.');
-        }
-    } catch (error) {
-        console.error('No se pudo borrar el caché de la cuenta de Microsoft:', error);
-        event.sender.send('log', '[ERROR] No se pudo borrar el caché de la cuenta.');
-    }
-});
-
-async function verifyJava(event) {
-    event.sender.send('log', '[INFO] Verificando instalación de Java...');
-    try {
-        const { stdout, stderr } = await execPromise('java -version');
-        const output = stderr || stdout;
-        if (output.includes('version "21.') || output.includes('version 21.')) {
-            event.sender.send('log', '[INFO] Java 21 encontrado.');
-            return true;
-        } else {
-            event.sender.send('log', `[WARN] Se encontró una versión de Java, pero no es la 21.`);
-            return false;
-        }
-    } catch (error) {
-        event.sender.send('log', '[WARN] Java no está instalado o no está en el PATH.');
-        return false;
-    }
 }
 
-ipcMain.on('install-java', async (event) => {
-    event.sender.send('log', '[INFO] Iniciando descarga de Java 21...');
-    const javaInstallerUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.msi';
-    const tempPath = app.getPath('temp');
-    const installerName = 'OpenJDK21-installer.msi';
-    const installerPath = path.join(tempPath, installerName);
+ipcMain.on('request-server-status', (event, { modality }) => {
+    if (statusInterval) clearInterval(statusInterval);
+    
+    fetchAndSendStatus(modality);
+    
+    statusInterval = setInterval(() => fetchAndSendStatus(modality), 5000);
+});
+// --- End of Server Status Handling ---
 
-    const dl = new DownloaderHelper(javaInstallerUrl, tempPath, { override: true, fileName: installerName });
+
+async function findJava(event) {
+    event.sender.send('log', '[INFO] Buscando una instalación de Java 21...');
+    const javaExe = process.platform === 'win32' ? 'java.exe' : 'java';
+
+    try {
+        const { stdout, stderr } = await execPromise(`${javaExe} -version`);
+        const output = stderr || stdout;
+        if (output.includes('version "21.') || output.includes('version 21.')) {
+            event.sender.send('log', `[INFO] Java 21 encontrado en el PATH del sistema.`);
+            return javaExe;
+        }
+    } catch (e) {
+        // Ignorar, Java podría no estar en el PATH
+    }
+
+    const searchPaths = [];
+    if (process.platform === 'win32') {
+        const programFiles = process.env['ProgramFiles'] || 'C:\\Program Files';
+        const programFilesX86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+        searchPaths.push(
+            path.join(programFiles, 'Java'),
+            path.join(programFiles, 'Eclipse Adoptium'),
+            path.join(programFiles, 'Semeru'),
+            path.join(programFilesX86, 'Java')
+        );
+        if (process.env.JAVA_HOME) searchPaths.unshift(process.env.JAVA_HOME);
+    } else if (process.platform === 'darwin') {
+        searchPaths.push('/Library/Java/JavaVirtualMachines');
+        if (process.env.JAVA_HOME) searchPaths.unshift(path.join(process.env.JAVA_HOME, 'Contents', 'Home'));
+    } else {
+        searchPaths.push('/usr/lib/jvm');
+        if (process.env.JAVA_HOME) searchPaths.unshift(process.env.JAVA_HOME);
+    }
+
+    for (const searchPath of searchPaths) {
+        if (!fs.existsSync(searchPath)) continue;
+        const subdirs = fs.readdirSync(searchPath);
+        for (const subdir of subdirs) {
+            if (subdir.includes('21')) {
+                const javaPath = path.join(searchPath, subdir, 'bin', javaExe);
+                const macJavaPath = path.join(searchPath, subdir, 'Contents', 'Home', 'bin', javaExe);
+                if (fs.existsSync(javaPath)) {
+                     event.sender.send('log', `[INFO] Java 21 encontrado en: ${javaPath}`);
+                     return `"${javaPath}"`;
+                }
+                if (fs.existsSync(macJavaPath)) {
+                    event.sender.send('log', `[INFO] Java 21 encontrado en: ${macJavaPath}`);
+                    return `"${macJavaPath}"`;
+                }
+            }
+        }
+    }
+
+    event.sender.send('log', '[WARN] No se encontró una instalación de Java 21.');
+    return null;
+}
+
+
+ipcMain.on('install-java', async (event) => {
+    const platform = process.platform;
+    let downloadUrl = '';
+    let fileName = '';
+    
+    event.sender.send('log', `[INFO] Iniciando descarga de Java 21 para ${platform}...`);
+    
+    if (platform === 'win32') {
+        downloadUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.msi';
+        fileName = 'OpenJDK21-installer.msi';
+    } else if (platform === 'darwin') {
+        downloadUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_mac_hotspot_21.0.4_7.pkg';
+        fileName = 'OpenJDK21-installer.pkg';
+    } else {
+        event.sender.send('log', '[ERROR] La instalación automática no está soportada en Linux desde el launcher.');
+        event.sender.send('java-install-failed', { message: 'Instalación automática no soportada en Linux.' });
+        return;
+    }
+
+    const tempPath = app.getPath('temp');
+    const installerPath = path.join(tempPath, fileName);
+
+    const dl = new DownloaderHelper(downloadUrl, tempPath, { override: true, fileName: fileName });
 
     dl.on('error', (err) => {
         event.sender.send('log', `[ERROR] No se pudo descargar Java: ${err.message}`);
-        event.sender.send('java-install-failed');
+        event.sender.send('java-install-failed', { message: 'Falló la descarga del instalador de Java.' });
     });
 
     dl.on('progress', (stats) => {
@@ -286,19 +333,27 @@ ipcMain.on('install-java', async (event) => {
 
     dl.on('end', async () => {
         try {
-            event.sender.send('java-install-progress', { text: 'Instalando... Esto puede tardar unos minutos.' });
-            await execPromise(`msiexec /i "${installerPath}" /qn`);
-            event.sender.send('log', '[INFO] Instalación de Java completada.');
+            if (platform === 'win32') {
+                event.sender.send('java-install-progress', { text: 'Descarga completa. Abriendo instalador...' });
+                shell.openPath(installerPath);
+                event.sender.send('java-install-progress', { text: 'Por favor, completa la instalación de Java y luego cierra y vuelve a abrir el launcher.' });
+
+            } else if (platform === 'darwin') {
+                 event.sender.send('java-install-progress', { text: 'Instalando... Se te pedirá la contraseña de administrador.' });
+                 await execPromise(`sudo installer -pkg "${installerPath}" -target /`);
+            }
+            
             event.sender.send('java-install-finished');
+
         } catch (installError) {
-            event.sender.send('log', `[ERROR] No se pudo instalar Java: ${installError.message}`);
-            event.sender.send('java-install-failed');
+            event.sender.send('log', `[ERROR] No se pudo abrir/instalar Java: ${installError.message}`);
+            event.sender.send('java-install-failed', { message: `Error al abrir el instalador: ${installError.message}` });
         }
     });
 
     dl.start().catch(err => {
         event.sender.send('log', `[ERROR] No se pudo iniciar la descarga de Java: ${err.message}`);
-        event.sender.send('java-install-failed');
+        event.sender.send('java-install-failed', { message: 'No se pudo iniciar la descarga de Java.' });
     });
 });
 
@@ -341,6 +396,7 @@ ipcMain.on('repair-installation', (event, { modality }) => {
     }
 });
 
+// UPDATED: Added 'mods' as a folderType
 ipcMain.on('open-folder', (event, { modality, folderType }) => {
     const basePath = getMinecraftPathForModality(modality);
     let targetFolder;
@@ -349,6 +405,8 @@ ipcMain.on('open-folder', (event, { modality, folderType }) => {
         targetFolder = path.join(basePath, 'shaderpacks');
     } else if (folderType === 'resourcepacks') {
         targetFolder = path.join(basePath, 'resourcepacks');
+    } else if (folderType === 'mods') {
+        targetFolder = path.join(basePath, 'mods');
     }
 
     if (targetFolder) {
@@ -453,9 +511,9 @@ ipcMain.on('force-close-game', () => {
 ipcMain.on('launch-minecraft', async (event, options) => {
     if (isGameRunning) return;
 
-    const javaReady = await verifyJava(event);
-    if (!javaReady) {
-        event.sender.send('java-not-found');
+    const javaPath = await findJava(event);
+    if (!javaPath) {
+        event.sender.send('java-not-found', { os: process.platform });
         return;
     }
 
@@ -473,15 +531,7 @@ ipcMain.on('launch-minecraft', async (event, options) => {
     try {
         await checkForModpackUpdate(options.modality, event, minecraftPath);
 
-        let auth;
-        if (options.loginType === 'premium') {
-            event.sender.send('log', '[INFO] Usando la sesión de Microsoft cacheada...');
-            auth = await Authenticator.getAuth('microsoft');
-        } else { 
-            event.sender.send('log', `[INFO] Iniciando sesión offline con el usuario: ${options.username}`);
-            auth = await Authenticator.getAuth(options.username);
-        }
-        
+        const auth = await Authenticator.getAuth(options.username || "microsoft");
         const modalityConfig = await getLaunchConfigForModality(options.modality, minecraftPath, event, options);
         
         let gameArguments = [];
@@ -498,6 +548,7 @@ ipcMain.on('launch-minecraft', async (event, options) => {
             overrides: {
                 detached: false,
                 gameArguments: gameArguments,
+                javaPath: javaPath,
             }
         };
 
@@ -509,37 +560,20 @@ ipcMain.on('launch-minecraft', async (event, options) => {
         setActivity(`Jugando ${currentModality}`, `Cargando...`);
         
         let gameStartedEmitted = false; 
-        
-        // ========================================================================
-        // DETECCIÓN DE CONEXIÓN/DESCONEXIÓN (LÓGICA MEJORADA)
-        // ========================================================================
-        const joinPatterns = ['Joining multiplayer world', 'Server brand is', '[CHAT]'];
-        const leavePatterns = ['disconnect', 'stopping!', 'returning to title screen'];
-
         launcher.on('data', (e) => {
             if (!gameStartedEmitted) {
                 gameStartedEmitted = true;
                 mainWindow.webContents.send('update-launch-button-state', 'running');
             }
             const logLine = e.toString();
-            const logLineLower = logLine.toLowerCase();
-
-            if (!isOnServer) {
-                if (joinPatterns.some(pattern => logLine.includes(pattern))) {
-                    isOnServer = true;
-                    mainWindow.webContents.send('log', '[INFO] Conexión al servidor detectada.');
-                    updateRpcWithCurrentStatus();
-                }
+            if (!isOnServer && logLine.includes('Joining multiplayer world')) {
+                isOnServer = true;
+                updateRpcWithCurrentStatus();
             }
-            
-            if (isOnServer) {
-                if (leavePatterns.some(pattern => logLineLower.includes(pattern))) {
-                    isOnServer = false;
-                    mainWindow.webContents.send('log', '[INFO] Desconexión del servidor detectada.');
-                    updateRpcWithCurrentStatus();
-                }
+            if (isOnServer && logLine.toLowerCase().includes('disconnect')) {
+                isOnServer = false;
+                updateRpcWithCurrentStatus();
             }
-
             mainWindow.webContents.send('log', `[DATA] ${e}`);
         });
 
@@ -561,7 +595,7 @@ ipcMain.on('launch-minecraft', async (event, options) => {
 
 
 async function checkForModpackUpdate(modality, event, minecraftPath) {
-    if (modality !== 'firemods-neoforge' && modality !== 'firelite-forge') {
+    if (modality !== 'firemods-neoforge') {
         return;
     }
 
@@ -618,27 +652,6 @@ async function getLaunchConfigForModality(modality, rootPath, event, options) {
                 event.sender.send('progress', { type: 'Descargando Instalador NeoForge...', task: 1, total: 1 });
                 const installerUrl = `https://maven.neoforged.net/net/neoforged/neoforge/${neoforgeVersion}/neoforge-${neoforgeVersion}-installer.jar`;
                 const dl = new DownloaderHelper(installerUrl, rootPath, { override: true, fileName: installerName });
-                await dl.start();
-            }
-            return {
-                forge: installerPath,
-                version: { number: mcVersion, type: 'release' }
-            };
-        }
-        case 'firelite-forge': {
-            const mcVersion = '1.20.1';
-            const forgeVersion = '47.4.0';
-            const installerName = `forge-${mcVersion}-${forgeVersion}-installer.jar`;
-            const installerPath = path.join(rootPath, installerName);
-
-            if (!fs.existsSync(installerPath)) {
-                event.sender.send('progress', { type: 'Descargando Instalador Forge...', task: 1, total: 1 });
-                
-                const installerUrl = `https://maven.minecraftforge.net/net/minecraftforge/forge/${mcVersion}-${forgeVersion}/forge-${mcVersion}-${forgeVersion}-installer.jar`;
-                
-                const dl = new DownloaderHelper(installerUrl, rootPath, { override: true, fileName: installerName });
-                
-                dl.on('error', err => event.sender.send('log', `[ERROR] Falló la descarga del instalador de Forge: ${err.message}`));
                 await dl.start();
             }
             return {

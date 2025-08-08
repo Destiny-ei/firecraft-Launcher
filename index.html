@@ -45,7 +45,6 @@
                             </div>
                             <div class="custom-options">
                                 <div class="custom-option" data-value="vanilla">Vanilla</div>
-                                <div class="custom-option" data-value="firelite-forge">FireLite (Forge 1.20.1)</div>
                                 <div class="custom-option selected" data-value="firemods-neoforge">FireMods (NeoForge 1.21.1)</div>
                             </div>
                         </div>
@@ -135,7 +134,6 @@
                 <label for="manage-modality-select">Gestionar modalidad:</label>
                 <select id="manage-modality-select" class="custom-input">
                     <option value="firemods-neoforge">FireMods (NeoForge 1.21.1)</option>
-                    <option value="firelite-forge">FireLite (Forge 1.20.1)</option>
                 </select>
             </div>
         
@@ -148,8 +146,10 @@
         
             <hr style="margin: 20px 0; border-color: rgba(100, 100, 120, 0.3);">
         
-            <h4><i class="fas fa-image"></i> Recursos Gráficos</h4>
+            <h4><i class="fas fa-folder-open"></i> Carpetas de Juego</h4>
             <div class="resource-buttons">
+                <!-- NEW: Button to open the mods folder -->
+                <button id="open-mods-folder" class="launch-button" style="margin: 5px; font-size: 14px;">Abrir Carpeta de Mods</button>
                 <button id="open-shaders-folder" class="launch-button" style="margin: 5px; font-size: 14px;">Abrir Carpeta de Shaders</button>
                 <button id="open-resourcepacks-folder" class="launch-button" style="margin: 5px; font-size: 14px;">Abrir Carpeta de Texturas</button>
             </div>
@@ -195,16 +195,30 @@
     <div id="java-install-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Java 21 no encontrado</h2>
-            <p>Para poder jugar, es necesario tener Java 21 instalado en tu sistema.</p>
-            <p>¿Quieres que el lanzador lo descargue e instale por ti?</p>
+            <p id="java-modal-main-text">Para poder jugar, es necesario tener Java 21 instalado en tu sistema.</p>
+            
+            <div id="java-linux-instructions" style="display: none; text-align: left; background-color: rgba(10,10,20,0.8); padding: 15px; border-radius: 5px; margin-top: 15px;">
+                <p>Parece que estás en Linux. La instalación automática no está soportada. Por favor, instala Java 21 usando el gestor de paquetes de tu distribución:</p>
+                <ul>
+                    <li><strong>Debian/Ubuntu:</strong> <code>sudo apt install openjdk-21-jdk</code></li>
+                    <li><strong>Fedora/CentOS:</strong> <code>sudo dnf install java-21-openjdk</code></li>
+                    <li><strong>Arch Linux:</strong> <code>sudo pacman -S jdk-openjdk</code></li>
+                </ul>
+                <p>Después de instalar, reinicia el launcher.</p>
+            </div>
+
+            <p id="java-modal-question" style="margin-top: 15px;">¿Quieres que el lanzador lo descargue e instale por ti?</p>
+            
             <div id="java-progress-container" style="display: none;">
                 <div class="progress-wrapper">
                     <div id="java-progress-bar"></div>
                 </div>
                 <p id="java-progress-text">Descargando...</p>
             </div>
+
             <div id="java-modal-buttons">
                  <button id="install-java-btn" class="launch-button">Sí, instalar Java</button>
+                 <button id="restart-java-btn" class="launch-button" style="display: none; background-color: var(--accent-yellow);">Reiniciar Launcher</button>
                  <button id="cancel-java-btn" class="launch-button" style="background: #555;">No, gracias</button>
             </div>
         </div>

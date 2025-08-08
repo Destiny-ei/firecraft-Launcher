@@ -1,99 +1,61 @@
-﻿Términos y Condiciones de FireCraft-Launcher
+﻿TÉRMINOS Y CONDICIONES DE FIRECRAFT LAUNCHER
 
-Fecha de última actualización: 1 de Agosto de 2024
+Última actualización: 1 de agosto de 2024
 
-Bienvenido(a) a FireCraft-Launcher. Estos Términos y Condiciones ("Términos") rigen el uso de nuestro software de launcher (el "Launcher") y nuestro sitio web firemods.net (el "Sitio").
+INTRODUCCIÓN
+Bienvenido a Firecraft Launcher. Estos Términos y Condiciones (en adelante, los “Términos”) regulan el acceso y uso de la aplicación Firecraft Launcher (en adelante, la “Aplicación”) desarrollada y mantenida por Firecraft Studio (en adelante, “Firecraft”, “nosotros” o “nuestro”). Al descargar, instalar o utilizar la Aplicación, usted (en adelante, el “Usuario” o “usted”) acepta quedar vinculado por estos Términos.
 
-Al descargar, instalar o utilizar nuestro Launcher, usted ("Usuario", "usted" o "su") acepta haber leído, entendido y estar de acuerdo con quedar vinculado por estos Términos, así como por los documentos a los que se hace referencia en ellos.
+DEFINICIONES
+2.1. “Contenido”: cualquier texto, imagen, audio, vídeo, software, archivos de configuración u otros materiales incluidos en la Aplicación.
+2.2. “Datos Personales”: información que permita identificar a una persona física.
+2.3. “Servicios”: todas las funcionalidades, actualizaciones y mantenimientos proporcionados a través de la Aplicación.
 
-Si no está de acuerdo con estos Términos, no debe descargar, instalar ni utilizar el Launcher.
+LICENCIA DE USO
+3.1. Firecraft otorga al Usuario una licencia limitada, no exclusiva, intransferible y revocable para descargar, instalar y usar la Aplicación únicamente en dispositivos compatibles.
+3.2. Esta licencia se concede de forma gratuita y no otorga al Usuario derechos sobre el código fuente ni permite explotación comercial de la Aplicación.
 
----
+RESTRICCIONES
+El Usuario se compromete a no:
+a) Descompilar, desensamblar o realizar ingeniería inversa de la Aplicación.
+b) Redistribuir, sublicenciar, vender o alquilar la Aplicación o sus partes.
+c) Eliminar, alterar o enmascarar los avisos de derechos de autor, marcas registradas u otros avisos de propiedad.
+d) Utilizar la Aplicación con fines ilícitos o contrarios a la buena fe.
 
-1. Relación con Minecraft y Mojang/Microsoft
+PROPIEDAD INTELECTUAL
+5.1. Todos los derechos de propiedad intelectual sobre la Aplicación, su código fuente, diseño gráfico, marcas y contenidos son propiedad exclusiva de Firecraft o de sus licenciantes.
+5.2. Queda estrictamente prohibida la reproducción, distribución, comunicación pública y transformación no autorizadas.
 
-Acuerdo de Licencia de Usuario Final (EULA) de Minecraft: El uso de FireCraft-Launcher para jugar Minecraft requiere que usted posea una copia legítima del juego. Usted reconoce y acepta que está sujeto y cumplirá en todo momento con el Acuerdo de Licencia de Usuario Final (EULA) de Minecraft y cualquier otro término de servicio proporcionado por Mojang Studios o Microsoft (en conjunto, "Términos de Mojang"). Nuestro Launcher es una herramienta para acceder al juego que usted ya posee, no una forma de eludir la compra del mismo.
+PRIVACIDAD Y PROTECCIÓN DE DATOS
+6.1. Para más información sobre el tratamiento de sus Datos Personales, consulte nuestra Política de Privacidad disponible en [enlace a política].
+6.2. Al usar la Aplicación, usted acepta el procesamiento de sus datos conforme a dicha política.
 
-No Afiliación Oficial: FireCraft-Launcher es un producto de terceros y no está afiliado, respaldado, ni asociado de ninguna manera con Mojang Studios, Microsoft, o la marca Minecraft. Todas las marcas comerciales y derechos de autor relacionados con Minecraft son propiedad de sus respectivos dueños.
+ACTUALIZACIONES Y MODIFICACIONES
+7.1. Firecraft podrá realizar, en cualquier momento y sin previo aviso, actualizaciones, mejoras o modificaciones en la Aplicación.
+7.2. El Usuario acepta que la Aplicación puede descargarse e instalarse automáticamente dichas actualizaciones.
 
----
+SOPORTE TÉCNICO 8.1. Firecraft no está obligado a proporcionar soporte técnico, pero hará esfuerzos razonables por atender consultas a través de los canales oficiales. 8.2. Cualquier solicitud de asistencia deberá enviarse a soporte@firemods.net.
 
-2. Descripción del Servicio
+EXENCIÓN DE GARANTÍAS
+9.1. La Aplicación se ofrece “TAL CUAL” y “SEGÚN DISPONIBILIDAD”, sin garantías de ningún tipo, expresas o implícitas.
+9.2. Firecraft no garantiza que la Aplicación sea ininterrumpida, libre de errores o segura.
 
-FireCraft-Launcher es un software alternativo que facilita el inicio y la gestión del juego Minecraft, ofreciendo acceso a modificaciones y optimizaciones a través de nuestro sitio web, firemods.net. El Launcher puede incluir características como gestión de múltiples versiones del juego, instalación simplificada de mods, optimización del rendimiento y perfiles de usuario personalizados.
+LIMITACIÓN DE RESPONSABILIDAD
+10.1. En ningún caso Firecraft será responsable por daños indirectos, especiales, incidentales o consecuentes, incluyendo pero no limitado a pérdida de datos, ingresos o beneficios.
+10.2. La responsabilidad total de Firecraft, por cualquier causa, se limita al monto pagado por el Usuario en caso de existir contraprestación económica.
 
-El Launcher se proporciona "tal cual". No garantizamos que funcione en todos los sistemas, ni que esté libre de errores o interrupciones. Nos reservamos el derecho de modificar, suspender o descontinuar el Launcher o cualquiera de sus características en cualquier momento.
+TERMINACIÓN
+11.1. Estos Términos permanecerán vigentes hasta su terminación por parte de cualquiera de las partes.
+11.2. Firecraft podrá rescindir la licencia de uso en caso de incumplimiento por parte del Usuario.
+11.3. Tras la terminación, el Usuario deberá dejar de usar y desinstalar la Aplicación.
 
----
+LEY APLICABLE Y JURISDICCIÓN
+12.1. Estos Términos se rigen por las leyes de la República de Méxicana.
+12.2. Para la resolución de controversias, las partes se someten a los tribunales competentes de la ciudad de Sinaloa, renunciando a cualquier otro fuero.
 
-3. Cuentas de Usuario y Seguridad
-
-Para utilizar el Launcher, deberá iniciar sesión con su cuenta de Microsoft/Mojang.
-
-Seguridad de la Cuenta: Usted es el único y total responsable de mantener la seguridad de sus credenciales de inicio de sesión de Minecraft/Microsoft. FireCraft-Launcher utiliza los métodos de autenticación proporcionados por Microsoft para proteger su cuenta y no almacena su contraseña directamente.
-
-Responsabilidad: No nos hacemos responsables de ninguna pérdida, daño, o acciones no autorizadas en su cuenta de Minecraft (incluyendo, pero no limitado a, la suspensión o baneo de su cuenta) que puedan resultar del uso de nuestro Launcher o de la falta de seguridad por su parte.
-
----
-
-4. Contenido de Terceros (Mods, Shaders, Texture Packs)
-
-Nuestro Launcher y el sitio firemods.net facilitan la instalación y el uso de modificaciones ("Mods"), paquetes de texturas, shaders y otro contenido creado por terceros. Al utilizar dicho contenido, usted entiende y acepta que:
-
-Sin Respaldo: No respaldamos, revisamos ni garantizamos la seguridad, funcionalidad o legalidad de ningún contenido de terceros, incluso si se ofrece a través de firemods.net. Usted lo instala y utiliza bajo su propio riesgo.
-
-Riesgos Potenciales: El contenido de terceros puede contener malware, causar inestabilidad en el juego, corromper sus mundos de juego o violar los Términos de Mojang. Le recomendamos encarecidamente que solo descargue contenido de fuentes confiables.
-
-Responsabilidad: No somos responsables de ningún daño a su software, hardware o cuenta de juego que resulte del uso de contenido de terceros a través de nuestro Launcher.
-
----
-
-5. Uso Aceptable y Conducta Prohibida
-
-Usted se compromete a no utilizar FireCraft-Launcher para:
-
-- Violar los Términos de Mojang.
-- Distribuir o utilizar copias pirateadas de Minecraft o de cualquier contenido de terceros.
-- Hacer trampas, utilizar hacks o cualquier software que otorgue una ventaja injusta en servidores multijugador.
-- Realizar ingeniería inversa, descompilar o intentar extraer el código fuente de nuestro Launcher.
-
-Nos reservamos el derecho de bloquear su acceso al Launcher si determinamos que ha violado esta sección.
-
----
-
-6. Propiedad Intelectual
-
-Todo el código, diseño, texto, gráficos y logotipos que componen FireCraft-Launcher y el sitio firemods.net son propiedad exclusiva de los creadores de FireCraft-Launcher y están protegidos por las leyes de propiedad intelectual. No se le permite redistribuir o modificar nuestro Launcher sin nuestro consentimiento previo y por escrito.
-
----
-
-7. Limitación de Responsabilidad
-
-EN LA MEDIDA MÁXIMA PERMITIDA POR LA LEY, FIRECRAFT-LAUNCHER NO SERÁ RESPONSABLE DE NINGÚN DAÑO DIRECTO O INDIRECTO, INCLUYENDO LA PÉRDIDA DE DATOS, PÉRDIDA DE MUNDOS DE JUEGO, CORRUPCIÓN DE ARCHIVOS, DAÑOS AL HARDWARE, O SUSPENSIÓN DE CUENTAS DE JUEGO, QUE SURJAN DEL USO O LA INCAPACIDAD DE USAR NUESTRO LAUNCHER O CUALQUIER CONTENIDO DE TERCEROS ACCEDIDO A TRAVÉS DE ÉL.
-
-NUESTRA RESPONSABILIDAD TOTAL HACIA USTED NO EXCEDERÁ EN NINGÚN CASO LA CANTIDAD DE CINCUENTA DÓLARES ESTADOUNIDENSES ($50.00 USD) O EL IMPORTE QUE NOS HAYA PAGADO (SI APLICA) EN LOS ÚLTIMOS SEIS MESES.
-
----
-
-8. Indemnización
-
-Usted acepta indemnizar y defender a FireCraft-Launcher de cualquier reclamación o gasto (incluidos los honorarios de abogados) que surja de su uso del Launcher, su violación de estos Térmimos, o su violación de los Términos de Mojang.
-
----
-
-9. Modificaciones a los Términos
-
-Nos reservamos el derecho de modificar estos Términos en cualquier momento. Le notificaremos de los cambios materiales a través de nuestro sitio web firemods.net o dentro del propio Launcher. Su uso continuado del Launcher después de la notificación constituirá su aceptación de los nuevos términos.
-
----
-
-10. Ley Aplicable y Jurisdicción
-
-Estos Términos se regirán e interpretarán de acuerdo con las leyes de los Estados Unidos Mexicanos y el Estado de Sinaloa. Cualquier disputa que surja en relación con estos Términos se someterá a la jurisdicción exclusiva de los tribunales competentes en el Estado de Sinaloa.
-
----
-
-11. Contacto
+DISPOSICIONES FINALES
+13.1. Si alguna cláusula de estos Términos se declara nula o inaplicable, no afectará la validez del resto.
+13.2. Firecraft podrá actualizar estos Términos publicando la nueva versión en la Aplicación o en su sitio web.
+ 11. Contacto
 
 Si tiene alguna pregunta sobre estos Términos y Condiciones o necesita asistencia, puede contactarnos a través de los siguientes medios:
 
